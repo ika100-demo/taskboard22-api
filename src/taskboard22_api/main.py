@@ -10,7 +10,7 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel
 
-from . import __version__
+from . import __version__, tasks
 from .logging_config import configure_logging
 from .metrics import MetricsMiddleware
 from .tracing import configure_tracing, tracing_enabled
@@ -23,6 +23,8 @@ app = FastAPI(title="taskboard22-api", version=__version__)
 app.add_middleware(MetricsMiddleware)
 if tracing_enabled():
     FastAPIInstrumentor.instrument_app(app)
+
+app.include_router(tasks.router)
 
 
 class HealthResponse(BaseModel):
