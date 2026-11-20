@@ -18,7 +18,8 @@ def tasks_client() -> Iterator[TestClient]:
         from taskboard22_api.tasks import TaskStore, get_task_store
     except ImportError as err:  # behaviour not built yet
         pytest.fail(f"spec 001 not implemented: taskboard22_api.tasks missing ({err})")
-    app.dependency_overrides[get_task_store] = lambda: TaskStore()
+    store = TaskStore()
+    app.dependency_overrides[get_task_store] = lambda: store
     try:
         yield TestClient(app)
     finally:
@@ -56,9 +57,10 @@ def test_ac_001_2_create_task_with_due_date(tasks_client: TestClient) -> None:  
         {"title": None},
         {"title": ""},
         {"title": "   "},
+        {"title": "\t\n "},
         {"title": "x" * 201},
     ],
-    ids=["missing", "null", "empty", "whitespace", "too-long"],
+    ids=["missing", "null", "empty", "whitespace", "whitespace-tabs-newlines", "too-long"],
 )
 def test_ac_001_3_invalid_title_is_rejected(  # AC-001.3
     tasks_client: TestClient, payload: dict[str, Any]
